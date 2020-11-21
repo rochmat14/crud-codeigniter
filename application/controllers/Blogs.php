@@ -21,6 +21,23 @@ class Blogs extends CI_Controller {
 		$this->load->view('layouts/footer');
 	}
 
+	public function show($slug)
+	{
+		$data['blogs_item'] = $this->blogs_model->get_blogs_slug($slug);
+
+		$this->load->view('blogs/show', $data);
+	}
+
+	public function contact($halaman = FALSE)
+	{
+		if($halaman === FALSE)
+		{
+			redirect('error_404');
+		}
+		
+		$this->load->view('contact/'.$halaman);
+	}
+
 	public function create()
 	{
 		$this->load->helper('form');
@@ -41,20 +58,31 @@ class Blogs extends CI_Controller {
 		}
 	}
 
-	public function edit()
+	public function edit($id)
 	{
 		$this->load->helper('form');
+		$this->load->library('form_validation');
 		
-		$this->load->view('blogs/edit');
+		$this->form_validation->set_rules('title', 'TITLE', 'required');
+		$this->form_validation->set_rules('text', 'TEXT', 'required');
+
+		if($this->form_validation->run() == FALSE)
+		{
+			$data['blogs_item'] = $this->blogs_model->get_blogs_id($id);
+
+			$this->load->view('blogs/edit', $data);
+		}
+		else{
+			$this->blogs_model->edit_blogs($id);
+
+			redirect('blogs');
+		}
 	}
 
-	public function contact($halaman = FALSE)
+	public function delete($id)
 	{
-		if($halaman === FALSE)
-		{
-			redirect('error_404');
-		}
-		
-		$this->load->view('contact/'.$halaman);
+		$this->blogs_model->delete_blogs($id);
+
+		redirect('blogs');
 	}
 }
